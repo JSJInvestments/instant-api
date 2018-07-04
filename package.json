@@ -1,4 +1,5 @@
 {
+  "private": true,
   "name": "instant-api",
   "version": "1.0.0",
   "description": "Core Express API functionality",
