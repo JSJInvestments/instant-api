@@ -23,7 +23,7 @@ const instant = InstantAPI(config);
 
 app.use(instant.auth());
 app.use(instant.cors());
-// app.use(instant.logging());
+app.logger = instant.logging();
 app.use(instant.routes());
 ```
 
