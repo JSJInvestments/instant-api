@@ -15,7 +15,7 @@ Sample usage:
 
 ```javascript
 const express = require('express');
-const InstantAPI = require('instant-api');
+const InstantAPI = require('instant-express-api');
 
 const app = express();
 // const config = ...
@@ -147,7 +147,8 @@ Or, if we are using versioned routes:
 
 ## Running Tests
 
-**Please note:** tests haven't yet been implemented
+**Please note:** tests haven't yet been implemented (https://auth0.com/blog/developing-npm-packages/).
+
 To run the tests, clone the repository and install the dependencies:
 
 ```bash
@@ -163,3 +164,7 @@ npm run test
 ## Roadmap
 
 - Firebase authentication
+
+## Author's Note
+
+Thanks goes to [Instant Feedback](https://instantfeedback.com.au) for allowing this package to be published.

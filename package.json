@@ -1,5 +1,5 @@
 {
-  "name": "instant-api",
+  "name": "instant-express-api",
   "version": "0.0.1",
   "description": "Core Express API functionality",
   "main": "lib/index.js",
