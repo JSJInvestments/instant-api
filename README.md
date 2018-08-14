@@ -63,6 +63,7 @@ Utilises [Express Basic Auth](https://www.npmjs.com/package/express-basic-auth).
 #### Options
 
 `method`: String authentication type, "basic"
+
 `users`: Data dictionary of username:password key value pairs
 
 Sample usage:
@@ -92,6 +93,7 @@ Utilises [Winston](https://www.npmjs.com/package/winston)
 #### Options
 
 `error`: Data dictionary of error options, namely `filename` for storing errors
+
 `combined`: Data dictionary of combined options, namely `filename` for storing all debug
 
 Sample usage:
@@ -107,9 +109,10 @@ Sample usage:
 
 ## Routes
 
-Autoconfigure API routes. Can handle versioned API routes and non-versioned. For example, let's assume you have a routes file that looks like this:
+Autoconfigure API routes. Can be used for versioned and non-versioned API routes (for example where route files are stored in `/api/routes` or `/api/v1.0/routes`). This would assume that we have a routes file that looks something like this:
 
 ```js
+// test.js, which can be accessed from GET /api/test or GET /api/v1.0/test, depending on your folder structure
 import express from 'express';
 
 const router = express.Router();
@@ -121,12 +124,11 @@ router.get('/', (req, res) => {
 module.exports = router;
 ```
 
-We might store this file in `/api/routes` or `/api/v1.0/routes`.
-
 #### Options
 
-`path`: String location of API routes directory
-`base`: Strong location of base API directory (only required when utilising versioned routes)
+`path`: String location of API routes directory, e.g `routes`
+
+`base`: String location of base API directory (only required when utilising versioned routes, e.g. `api`). **Note:** you can have multiple version directories, all of which will be searched and routes added.
 
 Sample usage:
 
