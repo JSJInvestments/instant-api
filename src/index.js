@@ -7,7 +7,7 @@ export { default as Actions } from './classes/Actions';
 export { default as Controller } from './classes/Controller';
 export { default as FirebaseRepository } from './classes/FirebaseRepository';
 
-export default config => {
+const initialize = config => {
   return {
     auth: auth(config),
     cors: cors(config),
@@ -15,3 +15,7 @@ export default config => {
     routes: routes(config),
   };
 };
+
+export { initialize };
+
+export default initialize;

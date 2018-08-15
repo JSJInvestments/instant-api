@@ -6,6 +6,7 @@
   "scripts": {
     "test": "mocha --require babel-core/register --require babel-polyfill",
     "build": "babel ./src -d ./lib",
+    "build:watch": "babel -w ./src -d ./lib",
     "prepublishOnly": "npm run build"
   },
   "repository": {
@@ -22,17 +23,19 @@
   "license": "MIT",
   "dependencies": {
     "circular-json": "^0.5.5",
+    "cors": "^2.8.4",
     "express": "^4.16.3",
     "express-basic-auth": "^1.1.5",
     "fs": "0.0.1-security",
     "glob": "^7.1.2",
     "http-status-codes": "^1.3.0",
+    "lodash": "^4.17.10",
     "path": "^0.12.7",
-    "winston": "^3.0.0",
-    "cors": "^2.8.4"
+    "winston": "^3.0.0"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-polyfill": "^6.26.0",
     "babel-preset-env": "^1.7.0",
