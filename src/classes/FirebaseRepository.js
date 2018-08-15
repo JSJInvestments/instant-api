@@ -10,7 +10,7 @@ const serialize = doc => {
 };
 
 export default class FirebaseRepository {
-  constructor() {
+  constructor(db, collection) {
     // Saves us having to bind each function manually using something like `this.findById = this.findById.bind(this);`
     _.bindAll(this, [
       'create',
@@ -22,6 +22,8 @@ export default class FirebaseRepository {
       'updateOrCreate',
       'delete',
     ]);
+    this.db = db;
+    this.collection = collection;
   }
 
   /**
@@ -29,7 +31,7 @@ export default class FirebaseRepository {
    * @param {Object} attributes Document attributes
    */
   async create(attributes) {
-    const doc = await firestore.collection(this.collection).add(attributes);
+    const doc = await this.db.collection(this.collection).add(attributes);
     return serialize(doc);
   }
 
@@ -38,7 +40,7 @@ export default class FirebaseRepository {
    * @param {Array} arr Array of Document attributes
    */
   async createMany(arr) {
-    const batch = firestore.batch();
+    const batch = this.db.batch();
     arr.forEach(attributes => create);
     return batch.commit();
   }
@@ -49,7 +51,7 @@ export default class FirebaseRepository {
    */
   async find(queries = []) {
     let items = [];
-    const colRef = await firestore.collection(this.collection);
+    const colRef = await this.db.collection(this.collection);
     let queryRef;
     queries.forEach(query => {
       queryRef = colRef.where(query[0], query[1], query[2]);
@@ -77,12 +79,11 @@ export default class FirebaseRepository {
    * @param {String} id
    */
   async findById(id) {
-    // const doc = await firestore
-    //   .collection(this.collection)
-    //   .doc(id)
-    //   .get();
-    // return serialize(doc);
-    return 'Yo bitch!';
+    const doc = await this.db
+      .collection(this.collection)
+      .doc(id)
+      .get();
+    return serialize(doc);
   }
 
   /**
@@ -91,7 +92,7 @@ export default class FirebaseRepository {
    * @param {Object} attributes Document attributes
    */
   async update(id, attributes) {
-    const doc = await firestore
+    const doc = await this.db
       .collection(this.collection)
       .doc(id)
       .set(data, { merge: true });
