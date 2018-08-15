@@ -3,7 +3,11 @@ import cors from './cors';
 import logging from './logging';
 import routes from './routes';
 
-module.exports = config => {
+export { default as Actions } from './classes/Actions';
+export { default as Controller } from './classes/Controller';
+export { default as FirebaseRepository } from './classes/FirebaseRepository';
+
+export default config => {
   return {
     auth: auth(config),
     cors: cors(config),
