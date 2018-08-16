@@ -2,10 +2,13 @@ import _ from 'lodash';
 
 const serialize = doc => {
   if (doc && doc.exists) {
-    return {
-      id: doc.id,
-      ...doc.data(),
-    };
+    const data = doc.data();
+    if (data.id) {
+      data._id = doc.id;
+    } else {
+      data.id = doc.id;
+    }
+    return data;
   }
 };
 

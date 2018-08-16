@@ -81,10 +81,7 @@ export default class Actions {
 
   async updateOrCreate(req, res, next) {
     try {
-      const doc = await this.controller.updateOrCreate(
-        req.body.query,
-        req.body.data
-      );
+      const doc = await this.controller.updateOrCreate(req.query, req.body);
       doc
         ? res.status(HttpStatusCodes.OK).send(doc)
         : res.status(HttpStatusCodes.NOT_FOUND).send();
