@@ -12,7 +12,13 @@ const serialize = doc => {
   }
 };
 
-export default class FirebaseRepository {
+const asyncForEach = async (array, callback) => {
+  for (let index = 0; index < array.length; index++) {
+    await callback(array[index], index, array);
+  }
+};
+
+export default class FirestoreRepository {
   constructor(db, collection) {
     // Saves us having to bind each function manually using something like `this.findById = this.findById.bind(this);`
     _.bindAll(this, [
@@ -37,6 +43,7 @@ export default class FirebaseRepository {
   async create(attributes) {
     try {
       const ref = await this.db.collection(this.collection).add(attributes);
+      console.log(ref);
       if (ref.id) {
         return await this.findById(ref.id);
       }
@@ -68,9 +75,14 @@ export default class FirebaseRepository {
    */
   async createMany(arr) {
     try {
+      let items = [];
       const batch = this.db.batch();
-      arr.forEach(attributes => create);
-      return batch.commit();
+      await asyncForEach(arr, async attributes => {
+        let item = await this.create(attributes);
+        items.push(item);
+      });
+      batch.commit();
+      return items;
     } catch (error) {
       throw error;
     }
