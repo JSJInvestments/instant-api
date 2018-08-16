@@ -8,6 +8,7 @@ API module for [Express](http://expressjs.com) apps.
 - CORS Middleware
 - Winston Logging
 - Routing (versioned and unversioned)
+- Actions, Controller and FirestoreRepository classes
 
 ## Example
 
@@ -19,7 +20,7 @@ const InstantAPI = require('instant-express-api');
 
 const app = express();
 // const config = ...
-const instant = InstantAPI(config);
+const instant = InstantAPI.initialize(config);
 
 app.use(instant.auth());
 app.use(instant.cors());
@@ -145,6 +146,69 @@ Or, if we are using versioned routes:
     "base": "api",
     "path": "routes"
 },
+```
+
+## Classes
+
+Sample usage:
+
+```js
+// routes/clients.js
+const express = require('express');
+const actions = require('../actions/clients');
+
+const router = express.Router();
+
+router.post('/', actions.create);
+router.post('/:id', actions.create);
+router.get('/', actions.find);
+router.get('/:id', actions.findById);
+router.put('/:id', actions.update);
+router.delete('/:id', actions.delete);
+
+module.exports = router;
+```
+
+```js
+// api/actions/clients.js
+const Actions = require('instant-express-api').Actions;
+const controller = require('../controllers/clients');
+
+class Clients extends Actions {
+  // Includes the following methods by default:
+  // create, createWithId, createMany, find, findOne, findById, update, updateOrCreate and delete
+  // Custom methods here...
+}
+
+module.exports = new Clients(controller);
+```
+
+```js
+// api/controllers/clients.js
+const Controller = require('instant-express-api').Controller;
+const repository = require('../repositories/clients');
+
+class Clients extends Controller {
+  // Includes the following methods by default:
+  // create, createWithId, createMany, find, findOne, findById, update, updateOrCreate and delete
+  // Custom methods here...
+}
+
+module.exports = new Clients(repository);
+```
+
+```js
+// api/repositories/clients.js
+const FirestoreRepository = require('instant-express-api').FirestoreRepository;
+const firebase = require('..'); // Your firestore initialisation script
+
+class Clients extends FirestoreRepository {
+  // Includes the following methods by default:
+  // create, createWithId, createMany, find, findOne, findById, update, updateOrCreate and delete
+  // Custom methods here...
+}
+
+module.exports = new Clients(firebase.db, 'clients');
 ```
 
 ## Running Tests
