@@ -1,4 +1,4 @@
-# instant-express-api
+# Instant (Express) API
 
 API module for [Express](http://expressjs.com) apps.
 
@@ -223,7 +223,7 @@ module.exports = new Clients(repository);
 ```js
 // api/repositories/clients.js
 const FirestoreRepository = require('instant-express-api').FirestoreRepository;
-const firebase = require('..'); // Your firestore initialisation script
+const firebase = require('../../firebase'); // Your firestore initialisation script (see below)
 
 class Clients extends FirestoreRepository {
   // Includes the following methods by default:
@@ -245,6 +245,23 @@ class Clients extends FirestoreRepository {
 }
 
 module.exports = new Clients(firebase.db, 'clients');
+```
+
+```js
+// firebase.js - see https://firebase.google.com/docs/admin/setup
+const admin = require('firebase-admin');
+
+const serviceAccount = require('./serviceAccountKey.json');
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
+
+const db = admin.firestore();
+const settings = { /* your settings... */ timestampsInSnapshots: true };
+db.settings(settings);
+
+module.exports = { db };
 ```
 
 ## Running Tests
