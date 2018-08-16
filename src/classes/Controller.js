@@ -5,6 +5,7 @@ export default class Controller {
     // Saves us having to bind each function manually using something like `this.findById = this.findById.bind(this);`
     _.bindAll(this, [
       'create',
+      'createWithId',
       'createMany',
       'find',
       'findOne',
@@ -19,6 +20,15 @@ export default class Controller {
   async create(attributes) {
     try {
       return await this.repository.create(attributes);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async createWithId(id, attributes) {
+    try {
+      console.log('Controller.createWithId', !!this.repository);
+      return await this.repository.createWithId(id, attributes);
     } catch (error) {
       throw error;
     }

@@ -14,6 +14,7 @@ export default class FirebaseRepository {
     // Saves us having to bind each function manually using something like `this.findById = this.findById.bind(this);`
     _.bindAll(this, [
       'create',
+      'createWithId',
       'createMany',
       'find',
       'findOne',
@@ -31,8 +32,25 @@ export default class FirebaseRepository {
    * @param {Object} attributes Document attributes
    */
   async create(attributes) {
-    const doc = await this.db.collection(this.collection).add(attributes);
-    return serialize(doc);
+    const ref = await this.db.collection(this.collection).add(attributes);
+    if (ref.id) {
+      const item = await this.findById(ref.id);
+      return item;
+    }
+  }
+
+  /**
+   * Create a document with an id (firestore.set)
+   * @param {String} id Document id
+   * @param {Object} attributes Document attributes
+   */
+  async createWithId(id, attributes) {
+    const ref = await this.db
+      .collection(this.collection)
+      .doc(id)
+      .set(attributes);
+    const item = await this.findById(id);
+    return item;
   }
 
   /**

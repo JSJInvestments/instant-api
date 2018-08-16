@@ -6,6 +6,7 @@ export default class Actions {
     // Saves us having to bind each function manually using something like `this.findById = this.findById.bind(this);`
     _.bindAll(this, [
       'create',
+      'createWithId',
       'createMany',
       'find',
       'findOne',
@@ -19,10 +20,18 @@ export default class Actions {
 
   async create(req, res, next) {
     try {
-      const doc = await this.controller.create(req.body);
-      doc
-        ? res.status(HttpStatusCodes.OK).send(doc)
-        : res.status(HttpStatusCodes.NOT_FOUND).send();
+      const id = await this.controller.create(req.body);
+      res.status(HttpStatusCodes.OK).send(id);
+    } catch (error) {
+      res.status(HttpStatusCodes.OK).send(error);
+    }
+  }
+
+  async createWithId(req, res, next) {
+    try {
+      console.log('Actions.createWithId', !!this.controller);
+      const id = await this.controller.createWithId(req.params.id, req.body);
+      res.status(HttpStatusCodes.OK).send(id);
     } catch (error) {
       res.status(HttpStatusCodes.OK).send(error);
     }
