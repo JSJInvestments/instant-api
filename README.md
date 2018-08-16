@@ -153,7 +153,7 @@ Or, if we are using versioned routes:
 Sample usage:
 
 ```js
-// routes/clients.js
+// api/routes/clients.js
 const express = require('express');
 const actions = require('../actions/clients');
 
