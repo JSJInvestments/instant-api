@@ -5,7 +5,7 @@ import routes from './routes';
 
 export { default as Actions } from './classes/Actions';
 export { default as Controller } from './classes/Controller';
-export { default as FirebaseRepository } from './classes/FirebaseRepository';
+export { default as FirestoreRepository } from './classes/FirestoreRepository';
 
 const initialize = config => {
   return {

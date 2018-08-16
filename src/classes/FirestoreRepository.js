@@ -165,5 +165,15 @@ export default class FirebaseRepository {
    * Delete a document
    * @param {String} id
    */
-  async delete(id) {}
+  async delete(id) {
+    try {
+      const ref = await this.db
+        .collection(this.collection)
+        .doc(id)
+        .delete();
+      return { deleted: !!ref };
+    } catch (error) {
+      throw error;
+    }
+  }
 }
