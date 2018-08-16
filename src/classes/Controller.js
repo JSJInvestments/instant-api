@@ -27,7 +27,6 @@ export default class Controller {
 
   async createWithId(id, attributes) {
     try {
-      console.log('Controller.createWithId', !!this.repository);
       return await this.repository.createWithId(id, attributes);
     } catch (error) {
       throw error;

@@ -6,7 +6,6 @@ export default class Actions {
     // Saves us having to bind each function manually using something like `this.findById = this.findById.bind(this);`
     _.bindAll(this, [
       'create',
-      'createWithId',
       'createMany',
       'find',
       'findOne',
@@ -20,18 +19,10 @@ export default class Actions {
 
   async create(req, res, next) {
     try {
-      const id = await this.controller.create(req.body);
-      res.status(HttpStatusCodes.OK).send(id);
-    } catch (error) {
-      res.status(HttpStatusCodes.OK).send(error);
-    }
-  }
-
-  async createWithId(req, res, next) {
-    try {
-      console.log('Actions.createWithId', !!this.controller);
-      const id = await this.controller.createWithId(req.params.id, req.body);
-      res.status(HttpStatusCodes.OK).send(id);
+      let response = req.params.id
+        ? await this.controller.createWithId(req.params.id, req.body)
+        : await this.controller.create(req.body);
+      res.status(HttpStatusCodes.OK).send(response);
     } catch (error) {
       res.status(HttpStatusCodes.OK).send(error);
     }
@@ -40,9 +31,7 @@ export default class Actions {
   async createMany(req, res, next) {
     try {
       const response = await this.controller.createMany(req.body);
-      response
-        ? res.status(HttpStatusCodes.OK).send(response)
-        : res.status(HttpStatusCodes.NOT_FOUND).send();
+      res.status(HttpStatusCodes.OK).send(response);
     } catch (error) {
       res.status(HttpStatusCodes.OK).send(error);
     }
@@ -50,7 +39,7 @@ export default class Actions {
 
   async find(req, res, next) {
     try {
-      const docs = await this.controller.find(req.body.query);
+      const docs = await this.controller.find(req.query);
       res.status(HttpStatusCodes.OK).send(docs);
     } catch (error) {
       res.status(HttpStatusCodes.OK).send(error);
@@ -59,7 +48,7 @@ export default class Actions {
 
   async findOne(req, res, next) {
     try {
-      const doc = await this.controller.findOne(req.body.query);
+      const doc = await this.controller.findOne(req.query);
       doc
         ? res.status(HttpStatusCodes.OK).send(doc)
         : res.status(HttpStatusCodes.NOT_FOUND).send();
