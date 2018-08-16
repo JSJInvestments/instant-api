@@ -177,6 +177,19 @@ const controller = require('../controllers/clients');
 class Clients extends Actions {
   // Includes the following methods by default:
   // create, createWithId, createMany, find, findOne, findById, update, updateOrCreate and delete
+  //
+  // E.g.
+  //   async create(req, res, next) {
+  //     try {
+  //       let response = req.params.id
+  //         ? await this.controller.createWithId(req.params.id, req.body)
+  //         : await this.controller.create(req.body);
+  //       res.status(HttpStatusCodes.OK).send(response);
+  //     } catch (error) {
+  //       res.status(HttpStatusCodes.OK).send(error);
+  //     }
+  //   }
+  //
   // Custom methods here...
 }
 
@@ -191,6 +204,16 @@ const repository = require('../repositories/clients');
 class Clients extends Controller {
   // Includes the following methods by default:
   // create, createWithId, createMany, find, findOne, findById, update, updateOrCreate and delete
+  //
+  // E.g.
+  // async create(attributes) {
+  //     try {
+  //       return await this.repository.create(attributes);
+  //     } catch (error) {
+  //       throw error;
+  //     }
+  //   }
+  //
   // Custom methods here...
 }
 
@@ -205,6 +228,19 @@ const firebase = require('..'); // Your firestore initialisation script
 class Clients extends FirestoreRepository {
   // Includes the following methods by default:
   // create, createWithId, createMany, find, findOne, findById, update, updateOrCreate and delete
+  //
+  // E.g.
+  //   async create(attributes) {
+  //     try {
+  //       const ref = await this.db.collection(this.collection).add(attributes);
+  //       if (ref.id) {
+  //         return await this.findById(ref.id);
+  //       }
+  //     } catch (error) {
+  //       throw error;
+  //     }
+  //   }
+  //
   // Custom methods here...
 }
 

@@ -43,7 +43,6 @@ export default class FirestoreRepository {
   async create(attributes) {
     try {
       const ref = await this.db.collection(this.collection).add(attributes);
-      console.log(ref);
       if (ref.id) {
         return await this.findById(ref.id);
       }
