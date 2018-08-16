@@ -3,7 +3,11 @@ import cors from './cors';
 import logging from './logging';
 import routes from './routes';
 
-module.exports = config => {
+export { default as Actions } from './classes/Actions';
+export { default as Controller } from './classes/Controller';
+export { default as FirestoreRepository } from './classes/FirestoreRepository';
+
+const initialize = config => {
   return {
     auth: auth(config),
     cors: cors(config),
@@ -11,3 +15,7 @@ module.exports = config => {
     routes: routes(config),
   };
 };
+
+export { initialize };
+
+export default initialize;
