@@ -1,4 +1,4 @@
-# instant-api
+# instant-express-api
 
 API module for [Express](http://expressjs.com) apps.
 
