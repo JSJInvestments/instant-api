@@ -1,5 +1,8 @@
 import assert from 'assert';
-import { Actions, Controller, FirebaseRepository } from '../src/index';
+import InstantAPI from '../src/index';
+import { Actions, Controller, FirestoreRepository } from '../src/index';
+
+const instant = InstantAPI();
 
 describe('InstantAPI', () => {
   it('Actions class should exist', () => {
@@ -10,7 +13,7 @@ describe('InstantAPI', () => {
     assert.equal(typeof Controller, 'function');
   });
 
-  it('FirebaseRepository class should exist', () => {
-    assert.equal(typeof FirebaseRepository, 'function');
+  it('FirestoreRepository class should exist', () => {
+    assert.equal(typeof FirestoreRepository, 'function');
   });
 });
