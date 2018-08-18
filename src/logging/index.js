@@ -30,8 +30,8 @@ const initializeLogging = config => {
   return logger;
 };
 
-export default config => {
+export default (config = {}) => {
   return () => {
-    return initializeLogging(config.logging);
+    return initializeLogging(config);
   };
 };

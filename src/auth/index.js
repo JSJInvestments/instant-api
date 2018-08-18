@@ -10,6 +10,6 @@ const loadAuthentication = config => {
   return instantAuth(config);
 };
 
-module.exports = config => {
-  return () => loadAuthentication(config.auth);
+module.exports = (config = {}) => {
+  return () => loadAuthentication(config);
 };

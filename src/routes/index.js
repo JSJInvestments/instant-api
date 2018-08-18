@@ -45,11 +45,11 @@ const autoConfigureRoutes = (router, config) => {
   return router;
 };
 
-export default config => {
+export default (config = {}) => {
   return () => {
     const router = express.Router();
     // Auto-configure routes
-    autoConfigureRoutes(router, config.routes);
+    autoConfigureRoutes(router, config);
     return router;
   };
 };
