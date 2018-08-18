@@ -2,17 +2,19 @@
 
 API module for [Express](http://expressjs.com) apps.
 
+**Please note:** this module contains some code that will assist with the creation of a Firebase Functions application. However, you can easily use this module for _any_ Express app, and other database/hosting drivers will be added in the future.
+
 ## Features
 
 - Basic Authentication
 - CORS Middleware
 - Winston Logging
-- Routing (versioned and unversioned)
-- Actions, Controller and FirestoreRepository classes
+- Automatic Routing
+- Firebase Admin initialisation
+- Generic Actions and Controller classes that can be easily extented to enable simple CRUD routing operations
+- Firebase Firestore specific Repository class to enable retrieval of Firestore collections and documents
 
-## Example
-
-Sample usage:
+## Sample Usage
 
 ```javascript
 const express = require('express');
@@ -22,9 +24,27 @@ const app = express();
 // const config = ...
 const instant = InstantAPI.initialize(config);
 
-app.use(instant.auth());
+// Create our app
+const app = express();
+
+// Initialise InstantAPI
+const instant = InstantAPI.initialize(config);
+
+// Set up CORS
 app.use(instant.cors());
+
+// Set up auth
+app.use(instant.auth());
+
+// Enable logging
 app.logger = instant.logging();
+// or, `logger = instant.logging();` if you want a global variable
+
+// Set up firebase
+app.firebase = instant.firebase();
+// or, `firebase = instant.firebase();` if you want a global variable
+
+// Set up the routes
 app.use(instant.routes());
 ```
 
@@ -61,59 +81,73 @@ Some features require a configuration object. Options should be passed in on ini
 
 Utilises [Express Basic Auth](https://www.npmjs.com/package/express-basic-auth).
 
+#### Sample Usage
+
+```javascript
+app.use(
+  instant.auth({
+    method: 'basic',
+    users: {
+      craig: 'pa55w0rd',
+      admin: 'supersecret',
+    },
+  })
+);
+```
+
 #### Options
 
-`method`: String authentication type, "basic"
-
-`users`: Data dictionary of username:password key value pairs
-
-Sample usage:
-
-```json
-"auth": {
-    "method": "basic",
-    "users": {
-        "craig": "pa55w0rd",
-        "admin": "supersecret",
-    }
-}
-```
+| Name     | Type     | Description                       | Options |
+| -------- | -------- | --------------------------------- | ------- |
+| `method` | `string` | Authentication type               | "basic" |
+| `users`  | `object` | username:password key value pairs |
 
 ## CORS
 
-Utilises [CORS](https://www.npmjs.com/package/cors). Sample usage:
+Utilises [CORS](https://www.npmjs.com/package/cors).
+
+### Sample usage
 
 ```javascript
 app.use(instant.cors());
 ```
 
+### Options
+
+N/A
+
 ## Logging
 
-Utilises [Winston](https://www.npmjs.com/package/winston)
+Utilises [Winston](https://www.npmjs.com/package/winston).
+
+### Sample usage
+
+```javascript
+app.logger = instant.logging({
+  error: {
+    filename: 'error.log',
+  },
+  combined: {
+    filename: 'combined.log',
+  },
+});
+```
 
 #### Options
 
-`error`: Data dictionary of error options, namely `filename` for storing errors
-
-`combined`: Data dictionary of combined options, namely `filename` for storing all debug
-
-Sample usage:
-
-```json
-"error": {
-    "filename": "error.log"
-},
-"combined": {
-    "filename": "combined.log"
-}
-```
+| Name                | Type     | Description                  | Options |
+| ------------------- | -------- | ---------------------------- | ------- |
+| `error.filename`    | `string` | File to log errors to        |
+| `combined.filename` | `string` | File to log combined logs to |
 
 ## Routes
 
-Autoconfigure API routes. Can be used for versioned and non-versioned API routes (for example where route files are stored in `/api/routes` or `/api/v1.0/routes`). This would assume that we have a routes file that looks something like this:
+Autoconfigure API routes (rather than manually importing each routes file one by one). Can be configured to utilise routes files from one directory (e.g. `./api/routes/`), or within base directories (useful for versioned routes such as `/api/v1.0/routes`).
+
+For example, we can expose a GET method on `/api/test/` assuming we've have `./api/routes/test.js` that looks something like this:
 
 ```js
-// test.js, which can be accessed from GET /api/test or GET /api/v1.0/test, depending on your folder structure
+// ./api/routes/test.js
 import express from 'express';
 
 const router = express.Router();
@@ -125,35 +159,102 @@ router.get('/', (req, res) => {
 module.exports = router;
 ```
 
+### Sample usage
+
+```javascript
+app.use(
+  instant.routes({
+    path: 'api/routes',
+  })
+);
+```
+
 #### Options
 
-`path`: String location of API routes directory, e.g `routes`
+| Name              | Type     | Description                                    | Options |
+| ----------------- | -------- | ---------------------------------------------- | ------- |
+| `base` (optional) | `string` | Location of base API directory, e.g. `api`     |
+| `path`            | `string` | Location of API routes directory, e.g `routes` |
 
-`base`: String location of base API directory (only required when utilising versioned routes, e.g. `api`). **Note:** you can have multiple version directories, all of which will be searched and routes added.
+**Note:** you can have multiple named directories that sit between the base and path, all of which will be automatically parsed, for example `./api/v1.0/routes/test.js` and `./api/v2.0/routes/test.js`.
 
-Sample usage:
+## Firebase
 
-```json
-"routes": {
-    "path": "api/routes"
-},
+Initialises our Firebase app and exposes the following services:
+
+- Auth (coming soon)
+- Firestore
+- Storage (coming soon)
+
+### Sample usage
+
+```javascript
+app.use(instant.firebase({
+  'serviceAccountKey': 'config/serviceAccountKey.json'
+});
 ```
 
-Or, if we are using versioned routes:
+#### Options
 
-```json
-"routes": {
-    "base": "api",
-    "path": "routes"
-},
-```
+| Name                | Type     | Description                                                                                         | Options |
+| ------------------- | -------- | --------------------------------------------------------------------------------------------------- | ------- |
+| `serviceAccountKey` | `string` | Location of Service Account Key JSON file (please see https://firebase.google.com/docs/admin/setup) |
 
 ## Classes
 
-Sample usage:
+Writing entity specific routes can be time consuming, especially when you have a lot of routing code replicated across multiple entities performing the same task. For example, imagine you have two API routes, `/api/clients` and `/api/users` that both have create, find all, find one, find by id, update and delete operations. The majority of the code will be same across both routes, performing functions such as fetching from the database, testing for the existence of a returned record or document, and handling the response.
+
+To alleviate this issue, this module includes classes that can perfom these basic tasks, which you can extend from for your own needs. However, this would assume the following code structure:
+
+```
+/api
+    /routes/test.js
+    /actions/test.js
+    /controllers/test.js
+    /repositories/test.js
+```
+
+- A `routes` method defines which `actions` method to execute for a given request.
+- An `actions` method defines which `controller` method to execute.
+- A `controller` method defines which `repository` method to execute.
+- A `repository` method communicates with a database and returns the results.
+
+Data is passed back from the repository to the action which handles the response. This might seem over elaborate, but provides a clear separation of concerns between the tasks being performed. It also provides the following benefits:
+
+- It would be relatively simple to swap one `repository` out for another. For example, as long as the same methods existed, we could swap between using a Mongo db and Firestore.
+- Although an `actions` could communicate directly with `respositories`, `controllers` enable us to perform calculations or operations on the results before they are returned. This means that `controllers` could reference other `controllers` and the calculations or operations happen in one place. It also separates what might be send in a request from the required inputs for retrieving or calculating data.
+
+**Note:** although not specifically referenced here, I would suggest also having an `adapters` directory for handling operations to other 3rd party APIs (such as Twilio or Sendgrid), as well as a `helpers` directory for common entity specific utilities such as validators or formatters.
+
+The following operations are currently supported:
+
+- `create`
+- `createMany`
+- `find`
+- `findOne`
+- `findById`
+- `update`
+- `updateOrCreate`
+- `delete`
+
+### Actions
+
+| Method           | Expected request           | Type     | Description                               | Example                  |
+| ---------------- | -------------------------- | -------- | ----------------------------------------- | ------------------------ |
+| `create`         | `req.body`                 | `object` | Attributes to create document with        | { "name": "Craig" }      |
+|                  | `req.params.id` (optional) | `string` | Id to create document with                | "00001"                  |
+| `find`           | `req.query`                | `string` | Search query                              | "name=Craig"             |
+| `findOne`        | `req.query`                | `string` | Search query                              | "name=Craig"             |
+| `findById`       | `req.params.id`            | `string` | Document id                               | "00001"                  |
+| `update`         | `req.body`                 | `object` | Attributes to update document with        | { "location": "Sydney" } |
+| `updateOrCreate` | `req.query`                | `string` | Search query                              | "name=Craig"             |
+|                  | `req.body`                 | `object` | Attributes to update/create document with | { "location": "Sydney" } |
+| `delete`         | `req.params.id`            | `string` | Document id                               | "00001"                  |
+
+### Sample usage
 
 ```js
-// api/routes/clients.js
+// ./api/routes/clients.js
 const express = require('express');
 const actions = require('../actions/clients');
 
@@ -170,7 +271,7 @@ module.exports = router;
 ```
 
 ```js
-// api/actions/clients.js
+// ./api/actions/clients.js
 const Actions = require('instant-express-api').Actions;
 const controller = require('../controllers/clients');
 
@@ -286,4 +387,4 @@ npm run test
 
 ## Author's Note
 
-Thanks goes to [Instant Feedback](https://instantfeedback.com.au) for allowing this package to be published.
+Thanks to [Instant Feedback](https://instantfeedback.com.au) for allowing this package to be published.
