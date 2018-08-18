@@ -98,7 +98,7 @@ app.use(
 #### Options
 
 | Name     | Type     | Description                       | Options |
-| -------- | -------- | --------------------------------- | ------- |
+| :------- | :------- | :-------------------------------- | :------ |
 | `method` | `string` | Authentication type               | "basic" |
 | `users`  | `object` | username:password key value pairs |
 
@@ -136,7 +136,7 @@ app.logger = instant.logging({
 #### Options
 
 | Name                | Type     | Description                  | Options |
-| ------------------- | -------- | ---------------------------- | ------- |
+| :------------------ | :------- | :--------------------------- | :------ |
 | `error.filename`    | `string` | File to log errors to        |
 | `combined.filename` | `string` | File to log combined logs to |
 
@@ -172,7 +172,7 @@ app.use(
 #### Options
 
 | Name              | Type     | Description                                    | Options |
-| ----------------- | -------- | ---------------------------------------------- | ------- |
+| :---------------- | :------- | :--------------------------------------------- | :------ |
 | `base` (optional) | `string` | Location of base API directory, e.g. `api`     |
 | `path`            | `string` | Location of API routes directory, e.g `routes` |
 
@@ -197,7 +197,7 @@ app.use(instant.firebase({
 #### Options
 
 | Name                | Type     | Description                                                                                         | Options |
-| ------------------- | -------- | --------------------------------------------------------------------------------------------------- | ------- |
+| :------------------ | :------- | :-------------------------------------------------------------------------------------------------- | :------ |
 | `serviceAccountKey` | `string` | Location of Service Account Key JSON file (please see https://firebase.google.com/docs/admin/setup) |
 
 ## Classes
@@ -240,7 +240,7 @@ The following operations are currently supported:
 ### Actions
 
 | Method           | Expected request           | Type     | Description                               | Example                  |
-| ---------------- | -------------------------- | -------- | ----------------------------------------- | ------------------------ |
+| :--------------- | :------------------------- | :------- | :---------------------------------------- | :----------------------- |
 | `create`         | `req.body`                 | `object` | Attributes to create document with        | { "name": "Craig" }      |
 |                  | `req.params.id` (optional) | `string` | Id to create document with                | "00001"                  |
 | `find`           | `req.query`                | `string` | Search query                              | "name=Craig"             |
