@@ -208,10 +208,14 @@ To alleviate this issue, this module includes classes that can perfom these basi
 
 ```
 /api
-    /routes/test.js
-    /actions/test.js
-    /controllers/test.js
-    /repositories/test.js
+    /routes
+        /test.js
+    /actions
+        /test.js
+    /controllers
+        /test.js
+    /repositories
+        /test.js
 ```
 
 - A `routes` method defines which `actions` method to execute for a given request.
