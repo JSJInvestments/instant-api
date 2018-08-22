@@ -10,7 +10,7 @@ API module for [Express](http://expressjs.com) apps.
 - CORS Middleware
 - Winston Logging
 - Automatic Routing
-- Express Session
+- Session
 - Firebase Admin initialisation
 - Generic Actions and Controller classes that can be easily extented to enable simple CRUD routing operations
 - Firebase Firestore specific Repository class to enable retrieval of Firestore collections and documents
@@ -182,22 +182,28 @@ app.use(
 
 ## Session
 
-Utilises [Express Session](https://www.npmjs.com/package/express-session).
+Utilises [Express Session](https://www.npmjs.com/package/express-session) or [Cookie Session](https://www.npmjs.com/package/cookie-session).
 
 ### Sample usage
 
 ```javascript
 app.use(instant.session({
-  "secret": "super-secret-phrase",
-  "resave": false,
-  "saveUninitialized": false,
-  "cookie": {}
+  "type": "express",
+  "options": {
+    "secret": "super-secret-phrase",
+    "resave": false,
+    "saveUninitialized": false,
+    "cookie": {}
+  }
 });
 ```
 
 #### Options
 
-See [Express Session](https://www.npmjs.com/package/express-session) for configuration options - these are passed directly from Instant Express API to Express Session.
+| Name      | Type     | Description                                                         | Options             |
+| :-------- | :------- | :------------------------------------------------------------------ | :------------------ |
+| `type`    | `string` | Session type                                                        | `express`, `cookie` |
+| `options` | `object` | Module specific options (see specific package for more information) |
 
 ## Firebase
 
