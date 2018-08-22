@@ -10,6 +10,7 @@ API module for [Express](http://expressjs.com) apps.
 - CORS Middleware
 - Winston Logging
 - Automatic Routing
+- Express Session
 - Firebase Admin initialisation
 - Generic Actions and Controller classes that can be easily extented to enable simple CRUD routing operations
 - Firebase Firestore specific Repository class to enable retrieval of Firestore collections and documents
@@ -178,6 +179,25 @@ app.use(
 | `prefix`          | `string` | Prefix to apply to routes, e.g. `api`          |
 
 **Note:** you can have multiple named directories that sit between the base and path, all of which will be automatically parsed, for example `./api/v1.0/routes/test.js` and `./api/v2.0/routes/test.js`.
+
+## Session
+
+Utilises [Express Session](https://www.npmjs.com/package/express-session).
+
+### Sample usage
+
+```javascript
+app.use(instant.session({
+  "secret": "super-secret-phrase",
+  "resave": false,
+  "saveUninitialized": false,
+  "cookie": {}
+});
+```
+
+#### Options
+
+See [Express Session](https://www.npmjs.com/package/express-session) for configuration options - these are passed directly from Instant Express API to Express Session.
 
 ## Firebase
 
