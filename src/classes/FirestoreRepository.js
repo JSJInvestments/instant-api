@@ -100,7 +100,7 @@ export default class FirestoreRepository {
       // Get the collection reference
       const colRef = this.db.collection(this.collection);
       // Baseline query reference
-      let queryRef;
+      let queryRef = colRef;
       // Add the queries to the query reference
       queries.forEach(query => {
         queryRef = colRef.where(query[0], query[1], query[2]);
