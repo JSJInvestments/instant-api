@@ -175,6 +175,7 @@ app.use(
 | :---------------- | :------- | :--------------------------------------------- | :------ |
 | `base` (optional) | `string` | Location of base API directory, e.g. `api`     |
 | `path`            | `string` | Location of API routes directory, e.g `routes` |
+| `prefix`          | `string` | Prefix to apply to routes, e.g. `api`          |
 
 **Note:** you can have multiple named directories that sit between the base and path, all of which will be automatically parsed, for example `./api/v1.0/routes/test.js` and `./api/v2.0/routes/test.js`.
 
