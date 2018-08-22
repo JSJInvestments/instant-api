@@ -10,11 +10,12 @@ const getDirectories = srcpath => {
     .filter(path => fs.statSync(path).isDirectory());
 };
 
-const configureVersions = (router, routesBase, routesPath) => {
+const configureVersions = (router, routesBase, routesPath, prefix) => {
   const versionPaths = getDirectories(routesBase);
   versionPaths.forEach(filePath => {
     const version = path.relative(routesBase, filePath);
-    configureRoutes(router, path.join(filePath, routesPath), version);
+    const versionPrefix = prefix ? `${prefix}/${version}` : version;
+    configureRoutes(router, path.join(filePath, routesPath), versionPrefix);
   });
 };
 
@@ -36,11 +37,11 @@ const configureRoutes = (router, routesPath, prefix) => {
 const autoConfigureRoutes = (router, config) => {
   // Routes path provided
   if (config.base) {
-    configureVersions(router, config.base, config.path);
+    configureVersions(router, config.base, config.path, config.prefix);
   }
   // Versioned routes
   else {
-    configureRoutes(router, config.path);
+    configureRoutes(router, config.path, config.prefix);
   }
   return router;
 };
