@@ -310,7 +310,7 @@ class Clients extends Actions {
   // Includes the following methods by default:
   // create, createWithId, createMany, find, findOne, findById, update, updateOrCreate and delete
   //
-  // E.g.
+  // e.g.
   //   async create(req, res, next) {
   //     try {
   //       let response = req.params.id
@@ -323,6 +323,22 @@ class Clients extends Actions {
   //   }
   //
   // Custom methods here...
+  // Note: we have to bind the method to `this`
+  //
+  // e.g.
+  //   constructor(controller) {
+  //     this.custom = this.custom.bind(this);
+  //     super(controller);
+  //   }
+  //
+  //   async custom(req, res, next) {
+  //     try {
+  //       let response = await this.controller.custom(req.params.id)
+  //       res.status(HttpStatusCodes.OK).send(response);
+  //     } catch (error) {
+  //       res.status(HttpStatusCodes.OK).send(error);
+  //     }
+  //   }
 }
 
 module.exports = new Clients(controller);
@@ -337,7 +353,7 @@ class Clients extends Controller {
   // Includes the following methods by default:
   // create, createWithId, createMany, find, findOne, findById, update, updateOrCreate and delete
   //
-  // E.g.
+  // e.g.
   // async create(attributes) {
   //     try {
   //       return await this.repository.create(attributes);
@@ -347,6 +363,21 @@ class Clients extends Controller {
   //   }
   //
   // Custom methods here...
+  // Note: we have to bind the method to `this`
+  //
+  // e.g.
+  //   constructor(repository) {
+  //     this.custom = this.custom.bind(this);
+  //     super(repository);
+  //   }
+  //
+  //   async custom(id) {
+  //     try {
+  //       return await this.repository.custom(id)
+  //     } catch (error) {
+  //       res.status(HttpStatusCodes.OK).send(error);
+  //     }
+  //   }
 }
 
 module.exports = new Clients(repository);
@@ -361,7 +392,7 @@ class Clients extends FirestoreRepository {
   // Includes the following methods by default:
   // create, createWithId, createMany, find, findOne, findById, update, updateOrCreate and delete
   //
-  // E.g.
+  // e.g.
   //   async create(attributes) {
   //     try {
   //       const ref = await this.db.collection(this.collection).add(attributes);
@@ -374,6 +405,21 @@ class Clients extends FirestoreRepository {
   //   }
   //
   // Custom methods here...
+  // Note: we have to bind the method to `this`
+  //
+  // e.g.
+  //   constructor(db, collection) {
+  //     this.custom = this.custom.bind(this);
+  //     super(db, collection);
+  //   }
+  //
+  //   async custom(id) {
+  //     try {
+  //       return await this.db.collection(this.collection).get(id);
+  //     } catch (error) {
+  //       res.status(HttpStatusCodes.OK).send(error);
+  //     }
+  //   }
 }
 
 module.exports = new Clients(firebase.db, 'clients');
