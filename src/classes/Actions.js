@@ -1,8 +1,9 @@
-import HttpStatusCodes from 'http-status-codes';
 import _ from 'lodash';
+import HttpStatus from 'http-status-codes';
+import serializeError from 'serialize-error';
 
 export default class Actions {
-  constructor(controller, options) {
+  constructor(controller) {
     // Saves us having to bind each function manually using something like `this.findById = this.findById.bind(this);`
     _.bindAll(this, [
       'create',
@@ -15,90 +16,95 @@ export default class Actions {
       'delete',
     ]);
     this.controller = controller;
-    this.options = options;
+  }
+
+  static send(res) {
+    return {
+      ok: payload => {
+        res.status(HttpStatus.OK).send(payload);
+      },
+      notFound: () => {
+        res.status(HttpStatus.NOT_FOUND).send();
+      },
+      error: error => {
+        res
+          .status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .send(serializeError(error));
+      },
+    };
   }
 
   async create(req, res, next) {
     try {
-      let response = req.params.id
+      let payload = req.params.id
         ? await this.controller.createWithId(req.params.id, req.body)
         : await this.controller.create(req.body);
-      res.status(HttpStatusCodes.OK).send(response);
+      Actions.send(res).ok(payload);
     } catch (error) {
-      res.status(HttpStatusCodes.OK).send(error);
+      Actions.send(res).error(error);
     }
   }
 
   async createMany(req, res, next) {
     try {
-      const response = await this.controller.createMany(req.body);
-      res.status(HttpStatusCodes.OK).send(response);
+      const payload = await this.controller.createMany(req.body);
+      Actions.send(res).ok(payload);
     } catch (error) {
-      res.status(HttpStatusCodes.OK).send(error);
+      Actions.send(res).error(error);
     }
   }
 
   async find(req, res, next) {
     try {
-      const docs = await this.controller.find(req.query);
-      res.status(HttpStatusCodes.OK).send(docs);
+      const payload = await this.controller.find(req.query);
+      Actions.send(res).ok(payload);
     } catch (error) {
-      res.status(HttpStatusCodes.OK).send(error);
+      Actions.send(res).error(error);
     }
   }
 
   async findOne(req, res, next) {
     try {
-      const doc = await this.controller.findOne(req.query);
-      doc
-        ? res.status(HttpStatusCodes.OK).send(doc)
-        : res.status(HttpStatusCodes.NOT_FOUND).send();
+      const payload = await this.controller.findOne(req.query);
+      payload ? Actions.send(res).ok(payload) : Actions.send(res).notFound();
     } catch (error) {
-      res.status(HttpStatusCodes.OK).send(error);
+      Actions.send(res).error(error);
     }
   }
 
   async findById(req, res, next) {
     try {
-      const doc = await this.controller.findById(req.params.id);
-      doc
-        ? res.status(HttpStatusCodes.OK).send(doc)
-        : res.status(HttpStatusCodes.NOT_FOUND).send();
+      const payload = await this.controller.findById(req.params.id);
+      payload ? Actions.send(res).ok(payload) : Actions.send(res).notFound();
     } catch (error) {
-      res.status(HttpStatusCodes.OK).send(error);
+      Actions.send(res).error(error);
     }
   }
 
   async update(req, res, next) {
     try {
-      const doc = await this.controller.update(req.params.id, req.body);
-      doc
-        ? res.status(HttpStatusCodes.OK).send(doc)
-        : res.status(HttpStatusCodes.NOT_FOUND).send();
+      const payload = await this.controller.update(req.params.id, req.body);
+      payload ? Actions.send(res).ok(payload) : Actions.send(res).notFound();
     } catch (error) {
-      res.status(HttpStatusCodes.OK).send(error);
+      Actions.send(res).error(error);
     }
   }
 
   async updateOrCreate(req, res, next) {
     try {
-      const doc = await this.controller.updateOrCreate(req.query, req.body);
-      doc
-        ? res.status(HttpStatusCodes.OK).send(doc)
-        : res.status(HttpStatusCodes.NOT_FOUND).send();
+      const payload = await this.controller.updateOrCreate(req.query, req.body);
+      payload ? Actions.send(res).ok(payload) : Actions.send(res).notFound();
     } catch (error) {
-      res.status(HttpStatusCodes.OK).send(error);
+      Actions.send(res).error(error);
     }
   }
 
   async delete(req, res, next) {
     try {
-      const response = await this.controller.delete(req.params.id);
-      response
-        ? res.status(HttpStatusCodes.OK).send(response)
-        : res.status(HttpStatusCodes.NOT_FOUND).send();
+      const payload = await this.controller.delete(req.params.id);
+      payload ? Actions.send(res).ok(payload) : Actions.send(res).notFound();
     } catch (error) {
-      res.status(HttpStatusCodes.OK).send(error);
+      Actions.send(res).error(error);
     }
   }
 }

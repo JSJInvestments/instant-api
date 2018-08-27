@@ -6,7 +6,6 @@ export default class FirestoreRepository {
     // Saves us having to bind each function manually using something like `this.findById = this.findById.bind(this);`
     _.bindAll(this, [
       'deserializeReferences',
-      'serializeReference',
       'serializeReferences',
       'serialize',
       'create',
@@ -44,31 +43,35 @@ export default class FirestoreRepository {
   }
 
   /**
-   * Populate specific document reference
-   * @param {object} data Document attributes
-   */
-  async serializeReference(data) {
-    try {
-      if (typeof data === 'object' && typeof data.get === 'function') {
-        const doc = await data.get();
-        data = await this.serialize(doc);
-      }
-      return data;
-    } catch (error) {
-      console.error(error);
-      throw error;
-    }
-  }
-
-  /**
    * Serialize document references
    * @param {object} data Document attributes
    * @param {object} options Options
    */
   async serializeReferences(data, options) {
     try {
+      let populate;
+      let rest;
+      if (options.populate) {
+        const split = options.populate.split('.');
+        populate = split.shift();
+        rest = split.length > 0 ? split.join('.') : null;
+      }
+
       await asyncForEach(Object.keys(data), async key => {
-        data[key] = await this.serializeReference(data[key]);
+        if (
+          typeof data[key] === 'object' &&
+          typeof data[key].get === 'function'
+        ) {
+          if (key === populate) {
+            const doc = await data[key].get();
+            data[key] = await this.serialize(doc, {
+              ...options,
+              populate: rest,
+            });
+          } else {
+            delete data[key];
+          }
+        }
       });
       return data;
     } catch (error) {
@@ -238,6 +241,7 @@ export default class FirestoreRepository {
    * @param {Object} attributes Document attributes
    */
   async update(id, attributes) {
+    console.log(id, attributes);
     try {
       attributes = this.deserializeReferences(attributes);
       const ref = await this.db

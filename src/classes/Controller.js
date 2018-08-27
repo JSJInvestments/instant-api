@@ -1,7 +1,7 @@
 import _ from 'lodash';
 
 export default class Controller {
-  constructor(repository, options) {
+  constructor(repository) {
     // Saves us having to bind each function manually using something like `this.findById = this.findById.bind(this);`
     _.bindAll(this, [
       'create',
@@ -15,7 +15,6 @@ export default class Controller {
       'delete',
     ]);
     this.repository = repository;
-    this.options = options;
   }
 
   async create(attributes) {
