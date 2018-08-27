@@ -5,6 +5,9 @@ export default class FirestoreRepository {
   constructor(db, collection) {
     // Saves us having to bind each function manually using something like `this.findById = this.findById.bind(this);`
     _.bindAll(this, [
+      'deserializeReferences',
+      'serializeReference',
+      'serializeReferences',
       'serialize',
       'create',
       'createWithId',
@@ -20,21 +23,84 @@ export default class FirestoreRepository {
     this.collection = collection;
   }
 
+  /**
+   * Convert string references to document references, e.g `businesses/dV7H6xpJRrRwXluMOWHr`
+   * @param {object} attributes Document attributes
+   */
+  deserializeReferences(attributes) {
+    try {
+      Object.keys(attributes).map((key, index) => {
+        attributes[key] =
+          typeof attributes[key] === 'string' &&
+          attributes[key].indexOf('/') !== -1
+            ? this.db.doc(attributes[key])
+            : attributes[key];
+      });
+      return attributes;
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  }
+
+  /**
+   * Populate specific document reference
+   * @param {object} data Document attributes
+   */
+  async serializeReference(data) {
+    try {
+      if (typeof data === 'object' && typeof data.get === 'function') {
+        const doc = await data.get();
+        data = await this.serialize(doc);
+      }
+      return data;
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  }
+
+  /**
+   * Serialize document references
+   * @param {object} data Document attributes
+   * @param {object} options Options
+   */
+  async serializeReferences(data, options) {
+    try {
+      await asyncForEach(Object.keys(data), async key => {
+        data[key] = await this.serializeReference(data[key]);
+      });
+      return data;
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  }
+
+  /**
+   * Serialize a Firebase document
+   * @param {object} doc Firebase document
+   * @param {object} options Options
+   */
   async serialize(doc, options = {}) {
     try {
       if (doc && doc.exists) {
+        // Serialize the data
         let data = doc.data();
+
         // Assign an id (prevents overriding the `id` field in the data if one exists)
         if (data.id) {
           data._id = doc.id;
         } else {
           data.id = doc.id;
         }
-        // Populate any references
-        if (options.populate && data[options.populate]) {
-          const popDoc = await data[options.populate].get();
-          data[options.populate] = await this.serialize(popDoc);
-        }
+
+        // Serialize references
+        data = this.serializeReferences(data, options);
+
+        // Populate references
+        // data = this.populateReference(data, options.populate);
+
         return data;
       }
     } catch (error) {
@@ -49,6 +115,7 @@ export default class FirestoreRepository {
    */
   async create(attributes) {
     try {
+      attributes = this.deserializeReferences(attributes);
       const ref = await this.db.collection(this.collection).add(attributes);
       if (ref.id) {
         return await this.findById(ref.id);
@@ -66,6 +133,7 @@ export default class FirestoreRepository {
    */
   async createWithId(id, attributes) {
     try {
+      attributes = this.deserializeReferences(attributes);
       const ref = await this.db
         .collection(this.collection)
         .doc(id)
@@ -86,6 +154,7 @@ export default class FirestoreRepository {
       let items = [];
       const batch = this.db.batch();
       await asyncForEach(arr, async attributes => {
+        attributes = this.deserializeReferences(attributes);
         let item = await this.create(attributes);
         items.push(item);
       });
@@ -170,6 +239,7 @@ export default class FirestoreRepository {
    */
   async update(id, attributes) {
     try {
+      attributes = this.deserializeReferences(attributes);
       const ref = await this.db
         .collection(this.collection)
         .doc(id)
@@ -187,9 +257,8 @@ export default class FirestoreRepository {
    * @param {Object} attributes Document attributes
    */
   async updateOrCreate(query, attributes) {
-    console.log('updateOrCreate', query, attributes);
     const item = await this.findOne(query);
-    console.log('updateOrCreate', item);
+    attributes = this.deserializeReferences(attributes);
     return item ? this.update(item.id, attributes) : this.create(attributes);
   }
 

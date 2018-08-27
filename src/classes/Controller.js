@@ -1,7 +1,7 @@
 import _ from 'lodash';
 
 export default class Controller {
-  constructor(repository) {
+  constructor(repository, options) {
     // Saves us having to bind each function manually using something like `this.findById = this.findById.bind(this);`
     _.bindAll(this, [
       'create',
@@ -15,6 +15,7 @@ export default class Controller {
       'delete',
     ]);
     this.repository = repository;
+    this.options = options;
   }
 
   async create(attributes) {
@@ -41,25 +42,25 @@ export default class Controller {
     }
   }
 
-  async find(query) {
+  async find(query, options) {
     try {
-      return await this.repository.find(query);
+      return await this.repository.find(query, options);
     } catch (error) {
       throw error;
     }
   }
 
-  async findOne(query) {
+  async findOne(query, options) {
     try {
-      return await this.repository.findOne(query);
+      return await this.repository.findOne(query, options);
     } catch (error) {
       throw error;
     }
   }
 
-  async findById(id) {
+  async findById(id, options) {
     try {
-      return await this.repository.findById(id);
+      return await this.repository.findById(id, options);
     } catch (error) {
       throw error;
     }

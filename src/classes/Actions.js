@@ -2,7 +2,7 @@ import HttpStatusCodes from 'http-status-codes';
 import _ from 'lodash';
 
 export default class Actions {
-  constructor(controller) {
+  constructor(controller, options) {
     // Saves us having to bind each function manually using something like `this.findById = this.findById.bind(this);`
     _.bindAll(this, [
       'create',
@@ -15,6 +15,7 @@ export default class Actions {
       'delete',
     ]);
     this.controller = controller;
+    this.options = options;
   }
 
   async create(req, res, next) {
