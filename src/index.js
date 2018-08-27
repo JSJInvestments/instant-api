@@ -9,6 +9,8 @@ export { default as Actions } from './classes/Actions';
 export { default as Controller } from './classes/Controller';
 export { default as FirestoreRepository } from './classes/FirestoreRepository';
 
+export { default as utils } from './utils';
+
 const initialize = (config = {}) => {
   return {
     auth: auth(config.auth),
