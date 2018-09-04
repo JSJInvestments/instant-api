@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { serializeDocument, serializeSnapshot } from 'instant-firestore-utils';
 import { asyncForEach, asyncMap } from '../utils';
 
 export default class FirestoreRepository {
@@ -6,8 +7,6 @@ export default class FirestoreRepository {
     // Saves us having to bind each function manually using something like `this.findById = this.findById.bind(this);`
     _.bindAll(this, [
       'deserializeReferences',
-      'serializeReferences',
-      'serialize',
       'create',
       'createWithId',
       'createMany',
@@ -36,76 +35,6 @@ export default class FirestoreRepository {
             : attributes[key];
       });
       return attributes;
-    } catch (error) {
-      console.error(error);
-      throw error;
-    }
-  }
-
-  /**
-   * Serialize document references
-   * @param {object} data Document attributes
-   * @param {object} options Options
-   */
-  async serializeReferences(data, options) {
-    try {
-      let populate;
-      let rest;
-      if (options.populate) {
-        const split = options.populate.split('.');
-        populate = split.shift();
-        rest = split.length > 0 ? split.join('.') : null;
-      }
-
-      await asyncForEach(Object.keys(data), async key => {
-        if (
-          typeof data[key] === 'object' &&
-          typeof data[key].get === 'function'
-        ) {
-          if (key === populate) {
-            const doc = await data[key].get();
-            data[key] = await this.serialize(doc, {
-              ...options,
-              populate: rest,
-            });
-          } else {
-            delete data[key];
-          }
-        }
-      });
-      return data;
-    } catch (error) {
-      console.error(error);
-      throw error;
-    }
-  }
-
-  /**
-   * Serialize a Firebase document
-   * @param {object} doc Firebase document
-   * @param {object} options Options
-   */
-  async serialize(doc, options = {}) {
-    try {
-      if (doc && doc.exists) {
-        // Serialize the data
-        let data = doc.data();
-
-        // Assign an id (prevents overriding the `id` field in the data if one exists)
-        if (data.id) {
-          data._id = doc.id;
-        } else {
-          data.id = doc.id;
-        }
-
-        // Serialize references
-        data = this.serializeReferences(data, options);
-
-        // Populate references
-        // data = this.populateReference(data, options.populate);
-
-        return data;
-      }
     } catch (error) {
       console.error(error);
       throw error;
@@ -173,7 +102,7 @@ export default class FirestoreRepository {
    * Find documents
    * @param {Object} query Search query
    */
-  async find(query, options) {
+  async find(query = {}, options = {}) {
     try {
       // Convert the query into an array of queries for Firestore
       const queries = Object.keys(query).map(k => [k, '==', query[k]]);
@@ -187,14 +116,21 @@ export default class FirestoreRepository {
       queries.forEach(query => {
         queryRef = colRef.where(query[0], query[1], query[2]);
       });
+      // Order if necessary
+      if (options.orderBy) {
+        queryRef = queryRef.orderBy(options.orderBy);
+      }
+      // Apply a limit if necessary
+      if (options.limit) {
+        queryRef = queryRef.limit(options.limit);
+      }
       // Perform the get request
       const snapshot = await queryRef.get();
-      if (!snapshot.empty) {
-        // Convert the snapshot to an array of objects
-        items = await asyncMap(snapshot.docs, async doc =>
-          this.serialize(doc, options)
-        );
-      }
+      items = serializeSnapshot(
+        snapshot,
+        options,
+        this.db.collection(this.collection)
+      );
       return items;
     } catch (error) {
       console.error(error);
@@ -206,12 +142,10 @@ export default class FirestoreRepository {
    * Find one document
    * @param {Object} query Search query
    */
-  async findOne(query) {
+  async findOne(query, options = {}) {
     try {
-      const items = await this.find(query);
-      if (items) {
-        return items[0];
-      }
+      const item = await this.find(query, { limit: 1 });
+      return item;
     } catch (error) {
       console.error(error);
       throw error;
@@ -222,13 +156,17 @@ export default class FirestoreRepository {
    * Find one document by id
    * @param {String} id
    */
-  async findById(id, options) {
+  async findById(id, options = {}) {
     try {
       const doc = await this.db
         .collection(this.collection)
         .doc(id)
         .get();
-      return await this.serialize(doc, options);
+      return await serializeDocument(
+        doc,
+        options,
+        this.db.collection(this.collection)
+      );
     } catch (error) {
       console.error(error);
       throw error;
