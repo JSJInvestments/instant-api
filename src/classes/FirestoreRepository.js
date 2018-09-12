@@ -97,7 +97,7 @@ export default class FirestoreRepository extends Default {
    * @param {string} id Document id
    * @param {object} options Options
    */
-  async createWithId(attributes, id, options = {}) {
+  async createWithId(id, attributes, options = {}) {
     try {
       const doc = new FirestoreDocument(this.db, this.colRef.doc(id));
       return await doc.create(attributes, options);
