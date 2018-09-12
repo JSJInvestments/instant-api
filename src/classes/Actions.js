@@ -1,11 +1,11 @@
-import _ from 'lodash';
+import Default from './Default';
 import HttpStatus from 'http-status-codes';
 import serializeError from 'serialize-error';
 
-export default class Actions {
+export default class Actions extends Default {
   constructor(controller) {
-    // Saves us having to bind each function manually using something like `this.findById = this.findById.bind(this);`
-    _.bindAll(this, [
+    super();
+    Default.bind(this, [
       'create',
       'createMany',
       'find',

@@ -1,9 +1,9 @@
-import _ from 'lodash';
+import Default from './Default';
 
-export default class Controller {
+export default class Controller extends Default {
   constructor(repository) {
-    // Saves us having to bind each function manually using something like `this.findById = this.findById.bind(this);`
-    _.bindAll(this, [
+    super();
+    Default.bind(this, [
       'create',
       'createWithId',
       'createMany',

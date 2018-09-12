@@ -1,40 +1,42 @@
-import _ from 'lodash';
-import { serializeDocument, serializeSnapshot } from 'instant-firestore-utils';
-import { asyncForEach, asyncMap } from '../utils';
+import Default from './Default';
+import { FirestoreCollection, FirestoreDocument } from 'instant-firestore';
 
-export default class FirestoreRepository {
-  constructor(db, collection) {
-    // Saves us having to bind each function manually using something like `this.findById = this.findById.bind(this);`
-    _.bindAll(this, [
-      'deserializeReferences',
+export default class FirestoreRepository extends Default {
+  constructor(db, colRef) {
+    super();
+    Default.bind(this, [
+      // Collection operations
       'create',
-      'createWithId',
       'createMany',
       'find',
       'findOne',
+      // Document operations
+      'createWithId',
       'findById',
       'update',
-      'updateOrCreate',
       'delete',
+      // Collection or Document operations
+      'updateOrCreate',
     ]);
     this.db = db;
-    this.collection = collection;
+    this.colRef = colRef;
+    this.collection = new FirestoreCollection(db, colRef);
   }
 
+  // ================================================================
+  //
+  // Collection Operations
+  //
+  // ================================================================
+
   /**
-   * Convert string references to document references, e.g `businesses/dV7H6xpJRrRwXluMOWHr`
+   * Create a Firestore Document
    * @param {object} attributes Document attributes
+   * @param {object} options Options
    */
-  deserializeReferences(attributes) {
+  async create(attributes, options = {}) {
     try {
-      Object.keys(attributes).map((key, index) => {
-        attributes[key] =
-          typeof attributes[key] === 'string' &&
-          attributes[key].indexOf('/') !== -1
-            ? this.db.doc(attributes[key])
-            : attributes[key];
-      });
-      return attributes;
+      return await this.collection.create(attributes, options);
     } catch (error) {
       console.error(error);
       throw error;
@@ -42,56 +44,13 @@ export default class FirestoreRepository {
   }
 
   /**
-   * Create a document (firestore.add)
-   * @param {Object} attributes Document attributes
+   * Create many Firestore Documents
+   * @param {object} attributes Document attributes
+   * @param {object} options Options
    */
-  async create(attributes) {
+  async createMany(arr, options = {}) {
     try {
-      attributes = this.deserializeReferences(attributes);
-      const ref = await this.db.collection(this.collection).add(attributes);
-      if (ref.id) {
-        return await this.findById(ref.id);
-      }
-    } catch (error) {
-      console.error(error);
-      throw error;
-    }
-  }
-
-  /**
-   * Create a document with an id (firestore.set)
-   * @param {String} id Document id
-   * @param {Object} attributes Document attributes
-   */
-  async createWithId(id, attributes) {
-    try {
-      attributes = this.deserializeReferences(attributes);
-      const ref = await this.db
-        .collection(this.collection)
-        .doc(id)
-        .set(attributes);
-      return await this.findById(id);
-    } catch (error) {
-      console.error(error);
-      throw error;
-    }
-  }
-
-  /**
-   * Create many documents
-   * @param {Array} arr Array of Document attributes
-   */
-  async createMany(arr) {
-    try {
-      let items = [];
-      const batch = this.db.batch();
-      await asyncForEach(arr, async attributes => {
-        attributes = this.deserializeReferences(attributes);
-        let item = await this.create(attributes);
-        items.push(item);
-      });
-      batch.commit();
-      return items;
+      return await this.collection.createMany(arr, options);
     } catch (error) {
       console.error(error);
       throw error;
@@ -100,38 +59,12 @@ export default class FirestoreRepository {
 
   /**
    * Find documents
-   * @param {Object} query Search query
+   * @param {object} query Search query
+   * @param {object} options Options
    */
   async find(query = {}, options = {}) {
     try {
-      // Convert the query into an array of queries for Firestore
-      const queries = Object.keys(query).map(k => [k, '==', query[k]]);
-      // Baseline items
-      let items = [];
-      // Get the collection reference
-      const colRef = this.db.collection(this.collection);
-      // Baseline query reference
-      let queryRef = colRef;
-      // Add the queries to the query reference
-      queries.forEach(query => {
-        queryRef = colRef.where(query[0], query[1], query[2]);
-      });
-      // Order if necessary
-      if (options.orderBy) {
-        queryRef = queryRef.orderBy(options.orderBy);
-      }
-      // Apply a limit if necessary
-      if (options.limit) {
-        queryRef = queryRef.limit(options.limit);
-      }
-      // Perform the get request
-      const snapshot = await queryRef.get();
-      items = serializeSnapshot(
-        snapshot,
-        options,
-        this.db.collection(this.collection)
-      );
-      return items;
+      return await this.collection.find(query, options);
     } catch (error) {
       console.error(error);
       throw error;
@@ -140,12 +73,34 @@ export default class FirestoreRepository {
 
   /**
    * Find one document
-   * @param {Object} query Search query
+   * @param {object} query Search query
+   * @param {object} options Options
    */
   async findOne(query, options = {}) {
     try {
-      const item = await this.find(query, { limit: 1 });
-      return item;
+      return await this.collection.findOne(query, options);
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  }
+
+  // ================================================================
+  //
+  // Document Operations
+  //
+  // ================================================================
+
+  /**
+   * Create a Firestore Document with an id
+   * @param {object} attributes Document attributes
+   * @param {string} id Document id
+   * @param {object} options Options
+   */
+  async createWithId(attributes, id, options = {}) {
+    try {
+      const doc = new FirestoreDocument(this.db, this.colRef.doc(id));
+      return await doc.create(attributes, options);
     } catch (error) {
       console.error(error);
       throw error;
@@ -153,20 +108,14 @@ export default class FirestoreRepository {
   }
 
   /**
-   * Find one document by id
-   * @param {String} id
+   * Find document by id
+   * @param {string} id Document id
+   * @param {object} options Options
    */
   async findById(id, options = {}) {
     try {
-      const doc = await this.db
-        .collection(this.collection)
-        .doc(id)
-        .get();
-      return await serializeDocument(
-        doc,
-        options,
-        this.db.collection(this.collection)
-      );
+      const doc = new FirestoreDocument(this.db, this.colRef.doc(id));
+      return await doc.find(options);
     } catch (error) {
       console.error(error);
       throw error;
@@ -174,19 +123,15 @@ export default class FirestoreRepository {
   }
 
   /**
-   * Find one document by id and update
-   * @param {String} id Document id
-   * @param {Object} attributes Document attributes
+   * Update Firestore Document
+   * @param {string} id Document id
+   * @param {object} attributes Document attributes
+   * @param {object} options Options
    */
-  async update(id, attributes) {
-    console.log(id, attributes);
+  async update(id, attributes, options = {}) {
     try {
-      attributes = this.deserializeReferences(attributes);
-      const ref = await this.db
-        .collection(this.collection)
-        .doc(id)
-        .update(attributes);
-      return await this.findById(id);
+      const doc = new FirestoreDocument(this.db, this.colRef.doc(id));
+      return await doc.update(attributes, options);
     } catch (error) {
       console.error(error);
       throw error;
@@ -194,27 +139,37 @@ export default class FirestoreRepository {
   }
 
   /**
-   * Find one document and update
-   * @param {Object} query Search query
-   * @param {Object} attributes Document attributes
-   */
-  async updateOrCreate(query, attributes) {
-    const item = await this.findOne(query);
-    attributes = this.deserializeReferences(attributes);
-    return item ? this.update(item.id, attributes) : this.create(attributes);
-  }
-
-  /**
-   * Delete a document
-   * @param {String} id
+   * Delete Firestore Document
+   * @param {string} id Document id
    */
   async delete(id) {
     try {
-      const ref = await this.db
-        .collection(this.collection)
-        .doc(id)
-        .delete();
-      return { deleted: !!ref };
+      const doc = new FirestoreDocument(this.db, this.colRef.doc(id));
+      return await doc.delete();
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  }
+
+  // ================================================================
+  //
+  // Collection or Document Operations
+  //
+  // ================================================================
+
+  /**
+   * Update or create a Firestore Document
+   * @param {object} query Search query
+   * @param {object} attributes Document attributes
+   * @param {object} options Options
+   */
+  async updateOrCreate(query, attributes, options) {
+    try {
+      const item = await this.findOne(query, options);
+      return item
+        ? await this.update(item.id, attributes, options)
+        : await this.create(attributes, options);
     } catch (error) {
       console.error(error);
       throw error;
