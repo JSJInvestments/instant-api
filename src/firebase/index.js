@@ -6,12 +6,12 @@ import firestore from './firestore';
 
 const initializeApp = config => {
   if (config.serviceAccountKey) {
-    const serviceAccount = require(path.join(
-      process.cwd(),
-      config.serviceAccountKey
-    ));
+    const serviceAccountKey =
+      typeof config.serviceAccountKey === 'string'
+        ? require(path.join(process.cwd(), config.serviceAccountKey))
+        : config.serviceAccountKey;
     const app = admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
+      credential: admin.credential.cert(serviceAccountKey),
     });
     return app;
   }

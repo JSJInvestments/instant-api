@@ -19,8 +19,8 @@ export default class FirestoreRepository extends Default {
       'updateOrCreate',
     ]);
     this.db = db;
-    this.colRef = colRef;
-    this.collection = new FirestoreCollection(db, colRef);
+    this.colRef = typeof colRef === 'string' ? db.collection(colRef) : colRef;
+    this.collection = new FirestoreCollection(this.db, this.colRef);
   }
 
   // ================================================================
