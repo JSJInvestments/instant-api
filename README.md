@@ -450,8 +450,8 @@ module.exports = { db };
 To run the tests, clone the repository and install the dependencies:
 
 ```bash
-git clone https://github.com/JSJInvestments/instant-api.git
-cd instant-api && npm i
+git clone https://github.com/JSJInvestments/instant-express-api.git
+cd instant-express-api && npm i
 npm run test
 ```
 

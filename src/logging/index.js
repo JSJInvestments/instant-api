@@ -1,6 +1,12 @@
+import morgan from 'morgan';
 import winston from 'winston';
 
-const initializeLogging = config => {
+const logRequests = config => {
+  const logger = morgan(process.NODE_ENV === 'production' ? 'tiny' : 'dev');
+  return logger;
+};
+
+const logOutput = config => {
   let transports = [
     new winston.transports.Console({ format: winston.format.simple() }),
   ];
@@ -31,7 +37,7 @@ const initializeLogging = config => {
 };
 
 export default (config = {}) => {
-  return () => {
-    return initializeLogging(config);
+  return type => {
+    return type === 'requests' ? logRequests(config) : logOutput(config);
   };
 };
