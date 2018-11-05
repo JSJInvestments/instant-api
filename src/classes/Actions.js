@@ -39,6 +39,7 @@ export default class Actions extends Default {
         res.status(HttpStatus.NOT_FOUND).send();
       },
       error: error => {
+        console.error(error);
         res
           .status(HttpStatus.INTERNAL_SERVER_ERROR)
           .send(serializeError(error));
