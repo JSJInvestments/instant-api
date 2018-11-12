@@ -2,7 +2,15 @@ import Default from './Default';
 import { FirestoreCollection, FirestoreDocument } from 'instant-firestore';
 
 export default class FirestoreRepository extends Default {
-  constructor(db, colRef) {
+  constructor(db, colRef, name) {
+    if (!db)
+      throw new Error(
+        'Required Firestore database reference missing from FirestoreRepository class instantiation.'
+      );
+    if (!colRef)
+      throw new Error(
+        'Required Firestore collection reference missing from FirestoreRepository class instantiation.'
+      );
     super();
     Default.bind(this, [
       // Collection operations

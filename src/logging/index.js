@@ -2,7 +2,7 @@ import morgan from 'morgan';
 import winston from 'winston';
 
 const logRequests = config => {
-  const logger = morgan(process.NODE_ENV === 'production' ? 'tiny' : 'dev');
+  const logger = morgan(process.env.NODE_ENV === 'production' ? 'tiny' : 'dev');
   return logger;
 };
 

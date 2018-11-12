@@ -5,6 +5,11 @@ import firestore from './firestore';
 // import storage from './storage';
 
 const initializeApp = config => {
+  if (!config.serviceAccountKey) {
+    throw new Error(
+      'config.firebase.serviceAccountKey required to initialize Firebase app.'
+    );
+  }
   if (config.serviceAccountKey) {
     const serviceAccountKey =
       typeof config.serviceAccountKey === 'string'
