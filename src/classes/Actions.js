@@ -2,6 +2,7 @@ import Default from './Default';
 import HttpStatus from 'http-status-codes';
 import serializeError from 'serialize-error';
 import { validationResult } from 'express-validator/check';
+import { compose } from 'compose-middleware';
 
 export default class Actions extends Default {
   constructor(controller) {
@@ -20,7 +21,10 @@ export default class Actions extends Default {
   }
 
   static validate(validation, req, res, next) {
-    validation(req, res, () => {
+    const composed = Array.isArray(validation)
+      ? compose(validation)
+      : validation;
+    composed(req, res, () => {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         Actions.send(res).error({ errors: errors.array() });

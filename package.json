@@ -1,6 +1,6 @@
 {
   "name": "instant-express-api",
-  "version": "2.5.8",
+  "version": "2.5.9",
   "description": "Core Express API functionality",
   "main": "lib/index.js",
   "scripts": {
@@ -23,6 +23,7 @@
   "license": "MIT",
   "dependencies": {
     "babel-runtime": "^6.26.0",
+    "compose-middleware": "^5.0.0",
     "cookie-session": "^2.0.0-beta.3",
     "cors": "^2.8.4",
     "express": "^4.16.3",
