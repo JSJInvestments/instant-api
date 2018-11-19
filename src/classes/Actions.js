@@ -1,7 +1,7 @@
 import Default from './Default';
 import HttpStatus from 'http-status-codes';
 import serializeError from 'serialize-error';
-import { validationResult } from 'express-validator/check';
+import { param, query, body, validationResult } from 'express-validator/check';
 import { compose } from 'compose-middleware';
 
 export default class Actions extends Default {
@@ -18,6 +18,10 @@ export default class Actions extends Default {
       'delete',
     ]);
     this.controller = controller;
+  }
+
+  static get validator() {
+    return { param, query, body };
   }
 
   static validate(validation, req, res, next) {
@@ -38,6 +42,9 @@ export default class Actions extends Default {
     return {
       ok: payload => {
         res.status(HttpStatus.OK).send(payload);
+      },
+      noContent: () => {
+        res.status(HttpStatus.NO_CONTENT).send();
       },
       notFound: () => {
         res.status(HttpStatus.NOT_FOUND).send();

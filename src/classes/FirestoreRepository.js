@@ -177,7 +177,7 @@ export default class FirestoreRepository extends Default {
       const item = await this.findOne(query, options);
       return item
         ? await this.update(item.id, attributes, options)
-        : await this.create(attributes, options);
+        : await this.create(attributes, { ...options, getDocument: true });
     } catch (error) {
       console.error(error);
       throw error;
