@@ -1,6 +1,6 @@
 {
   "name": "instant-express-api",
-  "version": "2.5.13",
+  "version": "2.5.14",
   "description": "Core Express API functionality",
   "main": "lib/index.js",
   "scripts": {
@@ -34,7 +34,7 @@
     "fs": "0.0.1-security",
     "glob": "^7.1.2",
     "http-status-codes": "^1.3.0",
-    "instant-firestore": "^0.2.0",
+    "instant-firestore": "^1.0.3",
     "lodash": "^4.17.10",
     "morgan": "^1.9.1",
     "path": "^0.12.7",
